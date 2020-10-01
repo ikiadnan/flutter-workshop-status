@@ -130,7 +130,7 @@ class AuthProvider with ChangeNotifier {
     SharedPreferences storage = await SharedPreferences.getInstance();
     String user = storage.getString('account');
     String password = storage.getString('password');
-    print('user: $user password: $password');
+    print('email: $user password: $password');
     return User(
       name: user,
       password: password

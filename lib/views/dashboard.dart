@@ -1,8 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+enum ProcessStatus { 
+   unfinished, 
+   running, 
+   finished
+}
 Color colorBackground = Color.fromRGBO(166,166,247,1);
+Color colorBlue = Color(0xFF092F5C);
 //Color colorIsOnFire = Color.fromRGBO(97,255,139,1);
 Color colorIsOnFire1 = Colors.greenAccent;
 Color colorIsOnFire2 = Colors.greenAccent;
@@ -45,6 +50,7 @@ class _DashboardState extends State<Dashboard> {
   Color colorBlue2 = Color.fromRGBO(71, 63, 194,1);
   Color colorOrange1 = Color.fromRGBO(245, 158, 59,1);
   Color colorOrange2 = Color.fromRGBO(212, 14, 11,1);
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -101,7 +107,7 @@ class _DashboardState extends State<Dashboard> {
           child: Text("Car Status",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: colorBlue,
               fontSize: 20,
             ),
           ),
@@ -112,21 +118,23 @@ class _DashboardState extends State<Dashboard> {
           Padding(
             padding: EdgeInsets.all(5),
             child: Card(
-              //key: Key(nodes.elementAt(i).name),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+                borderRadius: BorderRadius.circular(15),
               ),
               elevation: 5,
               child: Container(
                 height: 150,
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(20),
                 child: Stack(
                   children: [
                     Positioned(
-                      child: Image(
-                        width: 75,
-                        height: 75,
-                        image: AssetImage("assets/images/header.jpg"),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image(
+                          width: 75,
+                          height: 75,
+                          image: AssetImage("assets/images/car.png"),
+                        ),
                       ),
                     ),
                     Positioned(
@@ -208,7 +216,11 @@ class _DashboardState extends State<Dashboard> {
                                     fontSize: 12,
                                   ),
                                 ),
-                                Text("Dempul"),
+                                Text("Dempul",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -216,237 +228,18 @@ class _DashboardState extends State<Dashboard> {
                       )
                     ),
                     Positioned(
-                      bottom: 20,
-                      height: 20,
-                      child: Row(
-                        children: [
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            height: 3,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.grey,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      height: 20,
-                      child: Row(
-                        children: [
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 10,
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: Container(
-                              width: 10, height:10,
-                              decoration: new BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
                       bottom: 0,
-                      height: 20,
+                      height: 30,
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Ketok",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Dempul",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Epoxy",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Cat",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Poles",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Perakitan",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.1 + 5,
-                            child: Text("Finishing",
-                              style: TextStyle(
-                                fontSize: 8,
-                              ),
-                            ),
-                          ),
+                          processIndicator("Ketok", ProcessStatus.finished, ProcessStatus.finished),
+                          processIndicator("Dempul", ProcessStatus.running, ProcessStatus.unfinished),
+                          processIndicator("Epoxy", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                          processIndicator("Cat", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                          processIndicator("Poles", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                          processIndicator("Perakitan", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                          processIndicator("Finishing", ProcessStatus.unfinished, ProcessStatus.unfinished),
                         ],
                       ),
                     ),
@@ -458,5 +251,58 @@ class _DashboardState extends State<Dashboard> {
         );
       }
     return listItems;
+  }
+
+  Widget processIndicator(String processTxt, ProcessStatus currentStatus, nextStatus){
+    List<Color> barColor = [Colors.grey, Colors.green, Colors.green];
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.12,
+      //height: 50,
+      //color: Colors.grey,
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    height: 3,
+                    width: MediaQuery.of(context).size.width * 0.06,
+                    color: barColor[currentStatus.index],
+                  ),
+                  Container(
+                    height: 3,
+                    width: MediaQuery.of(context).size.width * 0.06,
+                    color: barColor[nextStatus.index],
+                  ),
+                ],
+              ),
+              
+              Container(
+                width: 10, height:10,
+                  decoration: new BoxDecoration(
+                    color: colorBlue,
+                    shape: BoxShape.circle,
+                  ),                     
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            width: MediaQuery.of(context).size.width * 0.12,
+            child: Text(processTxt,
+              style: TextStyle(
+                fontSize: 9,
+                color: currentStatus == ProcessStatus.running ? Colors.blue :  barColor[nextStatus.index],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
