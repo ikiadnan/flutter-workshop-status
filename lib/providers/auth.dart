@@ -26,7 +26,7 @@ class AuthProvider with ChangeNotifier {
   initAuthProvider() async {
     db = await DatabaseProvider.dbProvider.database;
     User user = await getLoggedInUser();
-    bool isAuthenticate = await DatabaseProvider.dbProvider.authenciateLoggedInUser(user);
+    bool isAuthenticate = await DatabaseProvider.dbProvider.authenticateLoggedInUser(user);
     if (isAuthenticate) {
       _loggedInUser = user;
       _status = Status.Authenticated;
@@ -44,7 +44,7 @@ class AuthProvider with ChangeNotifier {
 
     if(isSuccess){
       _status = Status.Authenticated;
-      User loggedInUser = User(name:email,password:password);
+      User loggedInUser = User(name: email, email: email, password: password);
       await storeUserData(loggedInUser.toJson());
       notifyListeners();
       return true;
@@ -130,7 +130,11 @@ class AuthProvider with ChangeNotifier {
     SharedPreferences storage = await SharedPreferences.getInstance();
     String user = storage.getString('account');
     String password = storage.getString('password');
-    return User(name: user, password: password);
+    print('user: $user password: $password');
+    return User(
+      name: user,
+      password: password
+    );
   }
 
   logOut([bool tokenExpired = false]) async {

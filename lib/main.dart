@@ -9,6 +9,8 @@ import 'package:cat_app/views/login.dart';
 import 'package:cat_app/views/register.dart';
 // import 'package:flutter_todo/views/password_reset.dart';
 import 'package:cat_app/views/orders.dart';
+import 'package:cat_app/views/invoice.dart';
+import 'package:cat_app/views/dashboard.dart';
 
 void main() {
   runApp(
@@ -20,6 +22,7 @@ void main() {
           '/': (context) => Router(),
           '/login': (context) => LogIn(),
           '/register': (context) => Register(),
+          '/print': (context) => InvoicePage(),
         },
       ),
     ),
@@ -42,7 +45,7 @@ class Router extends StatelessWidget {
           case Status.Authenticated:
             return ChangeNotifierProvider(
               create: (context) => OrderProvider(authProvider),
-              child: Orders(),
+              child: Dashboard(),
             );
           default:
             return LogIn();

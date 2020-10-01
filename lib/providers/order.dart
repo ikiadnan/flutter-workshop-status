@@ -5,6 +5,7 @@ import 'package:cat_app/utils/exceptions.dart';
 import 'package:cat_app/utils/order_response.dart';
 //import 'package:cat_app/services/api.dart';
 import 'package:cat_app/models/order.dart';
+import 'package:cat_app/providers/database.dart';
 
 class OrderProvider with ChangeNotifier {
   bool _initialized = false;
@@ -62,40 +63,11 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addOrder(String text) async {
-
-    try {
-      // Posts the new item to our API.
-      //int id = await apiService.addTodo(text);
-
-      // If no exceptions were thrown by API Service,
-      // we add the item to _openTodos.
-      Order order = new Order();
-      order.createdAt = DateTime.now();
-      order.updatedAt = DateTime.now();
-      order.createdBy = "me";
-      order.updatedBy = "me";
-      order.id = 123;
-      order.customerName = text;
-      order.customerAddress = "there";
-      order.idCar = 1;
-      order.items = ["a","b"];
-      order.itemsCount = [1,1];
-      order.status = 'inprogress';
-
+  Future<void> addOrder(Order order) async {
       List<Order> inprogressOdersModified = _inprogressOrders;
       inprogressOdersModified.insert(0, order);
-
       _inprogressOrders = inprogressOdersModified;
       notifyListeners();
-    }
-    // on AuthException {
-    //   // API returned a AuthException, so user is logged out.
-    //   await authProvider.logOut(true);
-    // }
-    catch (Exception) {
-      print(Exception);
-    }
   }
 
   Future<bool> toggleTodo(Order order) async {

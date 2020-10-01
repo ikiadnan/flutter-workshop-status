@@ -9,10 +9,10 @@ class Order {
     DateTime updatedAt;
     String createdBy;
     String updatedBy;
-    int id;
+    int orderId;
     String customerName;
     String customerAddress;
-    int idCar;
+    int carId;
     List<String> items = [];
     List<int> itemsCount = [];
     String status;
@@ -22,10 +22,10 @@ class Order {
       this.updatedAt,
       this.createdBy,
       this.updatedBy,
-      this.id,
+      this.orderId,
       this.customerName,
       this.customerAddress,
-      this.idCar,
+      this.carId,
       this.items,
       this.itemsCount,
       this.status
@@ -36,10 +36,10 @@ class Order {
       updatedAt: DateTime.parse(json["updated_at"]),
       createdBy: json["created_by"],
       updatedBy: json["updated_by"],
-      id: json["id"],
+      orderId: json["order_id"],
       customerName: json["customer_name"],
       customerAddress: json["customer_address"],
-      idCar: json["id_car"],
+      carId: json["car_id"],
       items: json["items"],
       itemsCount: json["items_count"],
       status: json["status"]
@@ -50,10 +50,10 @@ class Order {
       "updated_at": updatedAt.toIso8601String(),
       "created_by": createdBy,
       "updated_by": updatedBy,
-      "id": id,
+      "order_id": orderId,
       "customer_name": customerName,
       "customer_address": customerAddress,
-      "id_car": idCar,
+      "car_id": carId,
       "items": items,
       "items_count": itemsCount,
       "status": status

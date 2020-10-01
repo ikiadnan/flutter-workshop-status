@@ -21,7 +21,7 @@ Widget orderList(BuildContext context, List<Order> todos, toggleTodo, loadMore) 
           ? Icons.radio_button_unchecked
           : Icons.radio_button_checked;
       return ListTile(
-        key: Key((todo.id).toString()),
+        key: Key((todo.orderId).toString()),
         leading: Icon(statusIcon),
         title: Text(todo.customerName),
         enabled: todo.status != 'processing',

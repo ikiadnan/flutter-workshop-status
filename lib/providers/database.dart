@@ -9,6 +9,7 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 
 import 'package:cat_app/models/user.dart';
+import 'package:cat_app/models/order.dart';
 
 final userTable = 'users';
 final orderTable = 'orders';
@@ -26,13 +27,14 @@ class DatabaseProvider with ChangeNotifier {
 
   Database _database;
   final _userRef = intMapStoreFactory.store('users');
+  final _orderRef = intMapStoreFactory.store('orders');
 
   Future<Database> get database async {
     // If completer is null, AppDatabaseClass is newly instantiated, so database is not yet opened
     if (_dbOpenCompleter == null) {
       _dbOpenCompleter = Completer();
       // Calling _openDatabase will also complete the completer with database instance
-    _database = await initDatabaseProvider();
+      _database = await initDatabaseProvider();
     }
     // If the database is already opened, awaiting the future will happen instantly.
     // Otherwise, awaiting the returned future will take some time - until complete() is called
@@ -72,8 +74,6 @@ class DatabaseProvider with ChangeNotifier {
       User newUser = User(name: body['name'], email: body['email'], password: body['password']);
       await insertNewUser(newUser);
     }
-
-
     return statusCode;
   }
 
@@ -104,12 +104,34 @@ class DatabaseProvider with ChangeNotifier {
     return false;
   }
   
-  Future<bool> authenciateLoggedInUser(User loggedinUser) async {
+  Future<bool> authenticateLoggedInUser(User loggedinUser) async {
     var userlist = await getAllUserSortedByName();
     for(var user in userlist){
       if(user.email == loggedinUser.email && user.password == loggedinUser.password) return true;
     }
     return false;
+  }
+
+  Future<List<Order>> getAllOrderSortedById() async {
+    // Finder object can also sort data.
+    final finder = Finder(sortOrders: [
+      SortOrder('order_id'),
+    ]);
+
+    final recordSnapshots = await _orderRef.find(
+      await database,
+      finder: finder,
+    );
+    // Making a List<User> out of List<RecordSnapshot>
+    return recordSnapshots.map((snapshot) {
+      final order = Order.fromJson(snapshot.value);
+      print(order.toJson());
+      return order;
+    }).toList();
+  }
+
+  Future<int> createNewOrder(Order order) async {
+    return await _orderRef.add(await database, order.toJson());
   }
 
   initDatabaseProvider() async {
