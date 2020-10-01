@@ -12,7 +12,9 @@ class Order {
     int orderId;
     String customerName;
     String customerAddress;
-    int carId;
+    String phoneNumber;
+    String carId;
+    String carPlateNum;
     List<String> items = [];
     List<int> itemsCount = [];
     String status;
@@ -25,7 +27,9 @@ class Order {
       this.orderId,
       this.customerName,
       this.customerAddress,
+      this.phoneNumber,
       this.carId,
+      this.carPlateNum,
       this.items,
       this.itemsCount,
       this.status
@@ -39,7 +43,9 @@ class Order {
       orderId: json["order_id"],
       customerName: json["customer_name"],
       customerAddress: json["customer_address"],
+      phoneNumber: json["phone"],
       carId: json["car_id"],
+      carPlateNum: json["car_plate"],
       items: json["items"],
       itemsCount: json["items_count"],
       status: json["status"]
@@ -53,7 +59,9 @@ class Order {
       "order_id": orderId,
       "customer_name": customerName,
       "customer_address": customerAddress,
+      "phone": phoneNumber,
       "car_id": carId,
+      "car_plate": carPlateNum,
       "items": items,
       "items_count": itemsCount,
       "status": status

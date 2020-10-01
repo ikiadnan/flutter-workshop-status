@@ -112,10 +112,10 @@ class DatabaseProvider with ChangeNotifier {
     return false;
   }
 
-  Future<List<Order>> getAllOrderSortedById() async {
+  Future<List<Map<String,dynamic>>> getAllOrderSortedById() async {
     // Finder object can also sort data.
     final finder = Finder(sortOrders: [
-      SortOrder('order_id'),
+      SortOrder('created_at', false),
     ]);
 
     final recordSnapshots = await _orderRef.find(
@@ -124,8 +124,8 @@ class DatabaseProvider with ChangeNotifier {
     );
     // Making a List<User> out of List<RecordSnapshot>
     return recordSnapshots.map((snapshot) {
-      final order = Order.fromJson(snapshot.value);
-      print(order.toJson());
+      final order = snapshot.value;
+      print(order);
       return order;
     }).toList();
   }

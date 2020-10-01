@@ -1,13 +1,18 @@
 
+import 'package:cat_app/providers/order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:cat_app/widgets/styled_flat_button.dart';
+import 'package:cat_app/providers/auth.dart';
+import 'package:cat_app/models/order.dart';
 enum ProcessStatus { 
    unfinished, 
    running, 
    finished
 }
 Color colorBackground = Color.fromRGBO(166,166,247,1);
-Color colorBlue = Color(0xFF092F5C);
+Color colorBlue = Color(0xFF102C58);
 //Color colorIsOnFire = Color.fromRGBO(97,255,139,1);
 Color colorIsOnFire1 = Colors.greenAccent;
 Color colorIsOnFire2 = Colors.greenAccent;
@@ -34,22 +39,24 @@ class Dashboard extends StatefulWidget {
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
-
+  
   final String title;
   //final FirebaseApp app; 
 
   @override
   _DashboardState createState() => _DashboardState();
 }
-
-
 class _DashboardState extends State<Dashboard> {
- 
+  var top;
+  int _selectedIndex = 0;
 
-  Color colorBlue1 = Color.fromRGBO(70, 192, 226,1);
-  Color colorBlue2 = Color.fromRGBO(71, 63, 194,1);
-  Color colorOrange1 = Color.fromRGBO(245, 158, 59,1);
-  Color colorOrange2 = Color.fromRGBO(212, 14, 11,1);
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -63,34 +70,35 @@ class _DashboardState extends State<Dashboard> {
       statusBarColor: Colors.transparent,
     ));
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            leading: IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: (){},
-            ),
-            backgroundColor: Color.fromRGBO(71, 140, 194,1),
-            expandedHeight: MediaQuery.of(context).size.height * 0.25,
-            floating: false,
-            pinned: true,
-            snap: false,
-            elevation: 50,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text("Monitoring Cars"),
-              background: Image(
-                image: AssetImage("assets/images/header.jpg"),
-                fit: BoxFit.fitWidth,
-              ),
-            ),
+      backgroundColor: Color(0xFFF1F1F1),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            //showAddTaskSheet(context);
+            Navigator.pushNamed(context, '/neworder');
+            
+      // Provider.of<AuthProvider>(context, listen: false).logOut();
+      // Navigator.pop(context);
+          },
+          child: Icon(Icons.add),
+          backgroundColor: colorBlue,
+        ),
+      bottomNavigationBar: BottomNavigationBar(
+        elevation: 16,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
           ),
-          SliverList(
-            delegate: SliverChildListDelegate(_buildList()),
-          )
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            title: Text('Profil'),
+          ),
         ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: colorBlue,
+        onTap: _onItemTapped,
       ),
+      body: generateBody(context, _selectedIndex),
     );
   }
 
@@ -99,160 +107,286 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
   }
 
-  List _buildList(){
-    List<Widget> listItems = List();
-      listItems.add(
-        Container(
-          padding: EdgeInsets.all(10),
-          child: Text("Car Status",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: colorBlue,
-              fontSize: 20,
+  dynamic reloadOrders(BuildContext context) async {
+    List<Map<String,dynamic>> result = await Provider.of<OrderProvider>(context, listen: false).getAllOrder();
+    // if(result.length == 0){
+    //   Order newOrder = Order(customerName: 'empty');
+    //   result.add(newOrder.toJson());
+    // }
+    return result;
+  }
+  Widget generateBody(BuildContext context, int index){
+    if(index==0){
+      return CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            backgroundColor: colorBlue,
+            expandedHeight: MediaQuery.of(context).size.height * 0.25,
+            floating: false,
+            pinned: true,
+            snap: false,
+            elevation: 50,
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              title: 
+              // Text("Monitoring Car Service",
+              //   style: TextStyle(
+              //     fontFamily: 'Bebas',
+              //   ),
+              // ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                top = constraints.biggest.height;
+                print(top);
+                return FlexibleSpaceBar(
+                  titlePadding: EdgeInsets.only(top: 10),
+                  centerTitle: true,
+                  title: top < 100 ? Text("Monitoring Car Service") : dropDownTitle(),
+                );
+              }),
+              
+              background: Stack(
+                children: [
+                  SizedBox.expand(
+                    child: Image(
+                      image: AssetImage("assets/images/header.jpg"),
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                  SizedBox.expand(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xAA000000),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
             ),
           ),
-        )
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [Container(
+                child: _buildList(context),
+              )],
+            ),
+          ),
+        ],
       );
-      for (int i = 0; i < 10; i++) {
-        listItems.add(
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              elevation: 5,
+    } else return Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            StyledFlatButton(
+              'Log out',
+              onPressed: (){
+                Provider.of<AuthProvider>(context, listen: false).logOut();
+                //Navigator.pop(context);
+              }
+            ),
+          ],
+        ),
+      );
+  }
+  
+  Widget _buildList(BuildContext context) {
+    return FutureBuilder(
+      future : reloadOrders(context),
+      builder: (context, snap){
+        // if(snap.data == null){
+        //   return Container(
+        //     width: 10,
+        //   );
+        // }
+        List<Map<String,dynamic>> listorder = snap.data;
+        List<Widget> cardlist = [];
+        if(listorder != null){
+          cardlist.add(
+            Padding(
+              padding: EdgeInsets.only(left: 10, right: 10),
               child: Container(
-                height: 150,
-                padding: EdgeInsets.all(20),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image(
-                          width: 75,
-                          height: 75,
-                          image: AssetImage("assets/images/car.png"),
-                        ),
+                height: 50,
+                alignment: Alignment.bottomLeft,
+                child: Text("Car Status",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: colorBlue,
+                    fontSize: 20,
+                  ),
+                ),
+              )
+            )
+          );
+          for(var order in listorder){
+            cardlist.add(orderCard(order));
+          }
+        }
+        // return Column(children: [
+        //   Container(height: 150, color: Colors.grey),
+        //   Container(height: 150, color: Colors.blue),
+        //   Container(height: 150, color: Colors.grey),
+        //   Container(height: 150, color: Colors.blue),
+        // ],);
+        return Column(
+          children: cardlist,
+        );
+      }
+    );
+  }
+
+  Widget orderCard(Map<String,dynamic> order){
+    return Padding(
+          padding: EdgeInsets.all(5),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 5,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: 150,
+              padding: EdgeInsets.all(20),
+              child: Stack(
+                children: [
+                  Positioned(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Image(
+                        width: 75,
+                        height: 75,
+                        image: AssetImage("assets/images/car.png"),
                       ),
                     ),
-                    Positioned(
-                      left: 90,
-                      child: Container(
-                        child: Column(
-                          crossAxisAlignment:  CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text("Name: ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text("Faziri Nur Kholis",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text("Car Model: ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text("Toyota Alphard G ",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text("AB 46 US",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text("Order Date: ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text("3 October 2020",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text("Estimated work finish: ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text("20 October 2020",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text("Status: ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text("Dempul",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                      )
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      height: 30,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  ),
+                  Positioned(
+                    left: 90,
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment:  CrossAxisAlignment.start,
                         children: [
-                          processIndicator("Ketok", ProcessStatus.finished, ProcessStatus.finished),
-                          processIndicator("Dempul", ProcessStatus.running, ProcessStatus.unfinished),
-                          processIndicator("Epoxy", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                          processIndicator("Cat", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                          processIndicator("Poles", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                          processIndicator("Perakitan", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                          processIndicator("Finishing", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                          Row(
+                            children: [
+                              Text("Name: ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(order["customer_name"],
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text("Car Model: ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(order["car_id"] + " ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text('('+ order["car_plate"] + ')',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text("Order Date: ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(order["created_at"],
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text("Estimated work finish: ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(order["created_at"],
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text("Status: ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(order["status"],
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
-                      ),
+                      )
+                    )
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    height: 30,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        processIndicator("Ketok", ProcessStatus.finished, ProcessStatus.finished),
+                        processIndicator("Dempul", ProcessStatus.running, ProcessStatus.unfinished),
+                        processIndicator("Epoxy", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                        processIndicator("Cat", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                        processIndicator("Poles", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                        processIndicator("Perakitan", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                        processIndicator("Finishing", ProcessStatus.unfinished, ProcessStatus.unfinished),
+                      ],
                     ),
-                  ],
-                )
-              ),            
+                   ),
+                ],
+              )
             ),
           ),
         );
-      }
-    return listItems;
   }
-
+  Widget dropDownTitle(){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text("Monitoring"),
+        Text("Car Service"),
+        Text("Developed by Pekerja Sejati",
+          style: TextStyle(
+            fontSize: 8,
+          ),
+        ),
+      ],
+    );
+  }
   Widget processIndicator(String processTxt, ProcessStatus currentStatus, nextStatus){
     List<Color> barColor = [Colors.grey, Colors.green, Colors.green];
     return Container(

@@ -8,7 +8,7 @@ import 'package:cat_app/views/loading.dart';
 import 'package:cat_app/views/login.dart';
 import 'package:cat_app/views/register.dart';
 // import 'package:flutter_todo/views/password_reset.dart';
-import 'package:cat_app/views/orders.dart';
+import 'package:cat_app/views/neworder.dart';
 import 'package:cat_app/views/invoice.dart';
 import 'package:cat_app/views/dashboard.dart';
 
@@ -22,6 +22,7 @@ void main() {
           '/': (context) => Router(),
           '/login': (context) => LogIn(),
           '/register': (context) => Register(),
+          '/neworder': (context) => NewOrder(),
           '/print': (context) => InvoicePage(),
         },
       ),

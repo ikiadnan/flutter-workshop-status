@@ -15,6 +15,7 @@ class LogIn extends StatelessWidget {
       appBar: AppBar(
         title: Text('Log In'),
         leading: Container(),
+        backgroundColor: Color(0xFF102C58),
       ),
       body: Center(
         child: Container(

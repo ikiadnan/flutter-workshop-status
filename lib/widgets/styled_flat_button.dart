@@ -13,8 +13,8 @@ class StyledFlatButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      color: Colors.blue[500],
-      splashColor: Colors.blue[200],
+      color: Color(0xFF102C58),
+      splashColor: Color(0xFF102C58),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 18.0),
         child: Text(
@@ -32,7 +32,7 @@ class StyledFlatButton extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radius ?? 4.0),
         side: BorderSide(
-          color: Colors.blue[500],
+          color: Color(0xFF102C58),
           width: 2,
         ),
       ),

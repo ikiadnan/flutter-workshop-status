@@ -17,7 +17,7 @@ class AuthProvider with ChangeNotifier {
   User _loggedInUser;
 
   Status get status => _status;
-  String get user => _loggedInUser.name;
+  Map<String,dynamic> get user => _loggedInUser.toJson();
   NotificationText get notification => _notification;
   Database db;
 
@@ -26,6 +26,7 @@ class AuthProvider with ChangeNotifier {
   initAuthProvider() async {
     db = await DatabaseProvider.dbProvider.database;
     User user = await getLoggedInUser();
+    print(user.toJson());
     bool isAuthenticate = await DatabaseProvider.dbProvider.authenticateLoggedInUser(user);
     if (isAuthenticate) {
       _loggedInUser = user;
@@ -46,6 +47,7 @@ class AuthProvider with ChangeNotifier {
       _status = Status.Authenticated;
       User loggedInUser = User(name: email, email: email, password: password);
       await storeUserData(loggedInUser.toJson());
+      _loggedInUser = loggedInUser;
       notifyListeners();
       return true;
     }
@@ -122,17 +124,20 @@ class AuthProvider with ChangeNotifier {
 
   storeUserData(apiResponse) async {
     SharedPreferences storage = await SharedPreferences.getInstance();
-    await storage.setString('account', apiResponse['email']);
+    await storage.setString('name', apiResponse['name']);
+    await storage.setString('email', apiResponse['email']);
     await storage.setString('password', apiResponse['password']);
   }
 
   Future<User> getLoggedInUser() async {
     SharedPreferences storage = await SharedPreferences.getInstance();
-    String user = storage.getString('account');
+    String name = storage.getString('name');
+    String email = storage.getString('email');
     String password = storage.getString('password');
-    print('email: $user password: $password');
+    print('email: $name password: $password');
     return User(
-      name: user,
+      name: name,
+      email: email,
       password: password
     );
   }

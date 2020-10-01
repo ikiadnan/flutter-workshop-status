@@ -11,6 +11,7 @@ class Register extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFF102C58),
         title: Text('Register'),
       ),
       body: Center(

@@ -63,11 +63,13 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addOrder(Order order) async {
-      List<Order> inprogressOdersModified = _inprogressOrders;
-      inprogressOdersModified.insert(0, order);
-      _inprogressOrders = inprogressOdersModified;
-      notifyListeners();
+  Future<int> addOrder(Order order) async {
+      return await DatabaseProvider.dbProvider.createNewOrder(order);
+      //notifyListeners();
+  }
+
+  Future<List<Map<String,dynamic>>> getAllOrder() async {
+    return await DatabaseProvider.dbProvider.getAllOrderSortedById();
   }
 
   Future<bool> toggleTodo(Order order) async {
