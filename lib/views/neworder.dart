@@ -60,8 +60,8 @@ class NewOrderFormState extends State<NewOrderForm> {
       User user = User.fromJson(Provider.of<AuthProvider>(context,listen: false).user);
       order = Order(
         orderId: 1,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
         createdBy: user.name,
         updatedBy: user.name,
         customerName: customerName,
@@ -69,7 +69,7 @@ class NewOrderFormState extends State<NewOrderForm> {
         phoneNumber: customerPhone,
         carId: carId,
         carPlateNum: carPlateNum,
-        status: "ketok",
+        status: "Ketok",
       );
       int result = await DatabaseProvider.dbProvider.createNewOrder(order);
       if(result != null){

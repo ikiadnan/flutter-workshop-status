@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:cat_app/widgets/styled_flat_button.dart';
 import 'package:cat_app/providers/auth.dart';
 import 'package:cat_app/models/order.dart';
+import 'package:cat_app/views/orderdetails.dart';
 enum ProcessStatus { 
    unfinished, 
    running, 
@@ -71,17 +72,13 @@ class _DashboardState extends State<Dashboard> {
     ));
     return Scaffold(
       backgroundColor: Color(0xFFF1F1F1),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
           onPressed: () {
-            //showAddTaskSheet(context);
             Navigator.pushNamed(context, '/neworder');
-            
-      // Provider.of<AuthProvider>(context, listen: false).logOut();
-      // Navigator.pop(context);
           },
           child: Icon(Icons.add),
           backgroundColor: colorBlue,
-        ),
+      ) : null,
       bottomNavigationBar: BottomNavigationBar(
         elevation: 16,
         items: const <BottomNavigationBarItem>[
@@ -108,7 +105,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   dynamic reloadOrders(BuildContext context) async {
-    List<Map<String,dynamic>> result = await Provider.of<OrderProvider>(context, listen: false).getAllOrder();
+    List<Order> result = await Provider.of<OrderProvider>(context, listen: false).getAllOrder();
     // if(result.length == 0){
     //   Order newOrder = Order(customerName: 'empty');
     //   result.add(newOrder.toJson());
@@ -137,7 +134,6 @@ class _DashboardState extends State<Dashboard> {
               LayoutBuilder(
                 builder: (context, constraints) {
                 top = constraints.biggest.height;
-                print(top);
                 return FlexibleSpaceBar(
                   titlePadding: EdgeInsets.only(top: 10),
                   centerTitle: true,
@@ -201,7 +197,7 @@ class _DashboardState extends State<Dashboard> {
         //     width: 10,
         //   );
         // }
-        List<Map<String,dynamic>> listorder = snap.data;
+        List<Order> listorder = snap.data;
         List<Widget> cardlist = [];
         if(listorder != null){
           cardlist.add(
@@ -237,10 +233,15 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget orderCard(Map<String,dynamic> order){
+  Widget orderCard(Order order){
     return Padding(
-          padding: EdgeInsets.all(5),
-          child: Card(
+      padding: EdgeInsets.all(5),
+      child: GestureDetector(
+        onTap: () async {
+          await Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderDetails(order)));
+          setState((){});
+        },
+        child: Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
@@ -275,7 +276,7 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order["customer_name"],
+                              Text(order.customerName,
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -290,12 +291,12 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order["car_id"] + " ",
+                              Text(order.carId + " ",
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
                               ),
-                              Text('('+ order["car_plate"] + ')',
+                              Text('('+ order.carPlateNum + ')',
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -310,7 +311,7 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order["created_at"],
+                              Text(order.createdAt.toString(),
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -325,7 +326,7 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order["created_at"],
+                              Text(order.createdAt.toString(),
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -340,7 +341,7 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order["status"],
+                              Text(order.status,
                                 style: TextStyle(
                                   color: Colors.blue,
                                 ),
@@ -371,7 +372,9 @@ class _DashboardState extends State<Dashboard> {
               )
             ),
           ),
-        );
+      )
+          
+    );
   }
   Widget dropDownTitle(){
     return Column(

@@ -1,10 +1,11 @@
 import 'dart:convert';
 
-List<Order> todoFromJson(String str) => new List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
+List<Order> orderFromJson(String str) => new List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
 
-String todoToJson(List<Order> data) => json.encode(new List<dynamic>.from(data.map((x) => x.toJson())));
+String orderToJson(List<Order> data) => json.encode(new List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Order {
+    int id;
     DateTime createdAt;
     DateTime updatedAt;
     String createdBy;
@@ -20,6 +21,7 @@ class Order {
     String status;
     
     Order({
+      this.id,
       this.createdAt,
       this.updatedAt,
       this.createdBy,
@@ -36,6 +38,7 @@ class Order {
     });
 
     factory Order.fromJson(Map<String, dynamic> json) => new Order(
+      id: json["id"],
       createdAt: DateTime.parse(json["created_at"]),
       updatedAt: DateTime.parse(json["updated_at"]),
       createdBy: json["created_by"],
@@ -52,8 +55,9 @@ class Order {
     );
 
     Map<String, dynamic> toJson() => {
-      "created_at": createdAt.toIso8601String(),
-      "updated_at": updatedAt.toIso8601String(),
+      //"id": id,
+      "created_at": createdAt.toString(),
+      "updated_at": updatedAt.toString(),
       "created_by": createdBy,
       "updated_by": updatedBy,
       "order_id": orderId,

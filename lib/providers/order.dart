@@ -68,7 +68,7 @@ class OrderProvider with ChangeNotifier {
       //notifyListeners();
   }
 
-  Future<List<Map<String,dynamic>>> getAllOrder() async {
+  Future<List<Order>> getAllOrder() async {
     return await DatabaseProvider.dbProvider.getAllOrderSortedById();
   }
 
