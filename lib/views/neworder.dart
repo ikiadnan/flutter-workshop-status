@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import 'package:cat_app/providers/auth.dart';
 import 'package:cat_app/providers/order.dart';
@@ -59,19 +60,25 @@ class NewOrderFormState extends State<NewOrderForm> {
       //await Provider.of<OrderProvider>(context, listen: false).addOrder(order);
       User user = User.fromJson(Provider.of<AuthProvider>(context,listen: false).user);
       order = Order(
-        orderId: 1,
-        createdAt: DateTime.now().toUtc(),
-        updatedAt: DateTime.now().toUtc(),
+        createdAt: DateFormat.yMMMd().format(new DateTime.now()),
+        updatedAt: DateFormat.yMMMd().format(new DateTime.now()),
         createdBy: user.name,
         updatedBy: user.name,
+        orderId: 1,
         customerName: customerName,
         customerAddress: customerAddress,
         phoneNumber: customerPhone,
         carId: carId,
         carPlateNum: carPlateNum,
-        status: "Ketok",
+        itemsRefId: null,
+        status: "Queued",
+        statusCommentRefId: null,
+
       );
+      print("new order");
+      print(order.toJson());
       int result = await DatabaseProvider.dbProvider.createNewOrder(order);
+      print(result);
       if(result != null){
         Navigator.pop(context);
       }

@@ -10,6 +10,8 @@ import 'package:sembast/sembast_io.dart';
 
 import 'package:cat_app/models/user.dart';
 import 'package:cat_app/models/order.dart';
+// import 'package:cat_app/models/orderitem.dart';
+import 'package:cat_app/models/ordercomment.dart';
 
 final userTable = 'users';
 final orderTable = 'orders';
@@ -28,6 +30,8 @@ class DatabaseProvider with ChangeNotifier {
   Database _database;
   final _userRef = intMapStoreFactory.store('users');
   final _orderRef = intMapStoreFactory.store('orders');
+  final _orderItemsRef = intMapStoreFactory.store('order_items');
+  final _orderCommentsRef = intMapStoreFactory.store('order_comments');
 
   Future<Database> get database async {
     // If completer is null, AppDatabaseClass is newly instantiated, so database is not yet opened
@@ -112,7 +116,17 @@ class DatabaseProvider with ChangeNotifier {
     return false;
   }
 
-  Future<List<Order>> getAllOrderSortedById() async {
+  Future<List<OrderComment>> getAllOrderComment(List<Order> orders) async {
+    List<OrderComment> result = [];
+    for(Order order in orders){
+      if(order.statusCommentRefId != null){
+        Map<String,dynamic> mapOc = await _orderCommentsRef.record(order.id).get(await database);
+        result.add(OrderComment.fromJson(mapOc));
+      }
+    }
+    return result;
+  }
+  Future<List<Order>> getAllOrderSortedByDate() async {
     // Finder object can also sort data.
     final finder = Finder(sortOrders: [
       SortOrder('created_at', false),
@@ -135,8 +149,14 @@ class DatabaseProvider with ChangeNotifier {
     return await _orderRef.add(await database, order.toJson());
   }
 
-  Future<Map<String,dynamic>> updateOrder(int orderId, Order order) async {
-    return await _orderRef.record(orderId).update(await database, order.toJson());
+  Future<Map<String,dynamic>> updateOrder(int orderId, Order order, [OrderComment comment]) async {
+    if(comment != null){
+      await _orderCommentsRef.record(orderId).put(await database, comment.toJson());
+      Order newOrder = Order.fromOrderAndCommentRef(order, orderId);
+      return await _orderRef.record(orderId).update(await database, newOrder.toJson());
+    } else {
+      return await _orderRef.record(orderId).update(await database, order.toJson());
+    }
   }
 
   initDatabaseProvider() async {

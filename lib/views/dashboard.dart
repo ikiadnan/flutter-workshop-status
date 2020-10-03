@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:cat_app/widgets/styled_flat_button.dart';
 import 'package:cat_app/providers/auth.dart';
 import 'package:cat_app/models/order.dart';
+import 'package:cat_app/models/ordercomment.dart';
 import 'package:cat_app/views/orderdetails.dart';
 enum ProcessStatus { 
    unfinished, 
@@ -105,12 +106,9 @@ class _DashboardState extends State<Dashboard> {
   }
 
   dynamic reloadOrders(BuildContext context) async {
-    List<Order> result = await Provider.of<OrderProvider>(context, listen: false).getAllOrder();
-    // if(result.length == 0){
-    //   Order newOrder = Order(customerName: 'empty');
-    //   result.add(newOrder.toJson());
-    // }
-    return result;
+    List<Order> orders = await Provider.of<OrderProvider>(context, listen: false).getAllOrder();
+    List<OrderComment> comment = await Provider.of<OrderProvider>(context, listen: false).getAllComments(orders);
+    return {orders,comment};
   }
   Widget generateBody(BuildContext context, int index){
     if(index==0){
@@ -197,7 +195,9 @@ class _DashboardState extends State<Dashboard> {
         //     width: 10,
         //   );
         // }
-        List<Order> listorder = snap.data;
+        
+        List<Order> listorder = snap.data.elementAt(0);
+        List<OrderComment> listcomment = snap.data.elementAt(1);
         List<Widget> cardlist = [];
         if(listorder != null){
           cardlist.add(
@@ -216,8 +216,10 @@ class _DashboardState extends State<Dashboard> {
               )
             )
           );
+          int i=0;
           for(var order in listorder){
-            cardlist.add(orderCard(order));
+            cardlist.add(orderCard(order, listcomment.isEmpty ? null : listcomment[i]));
+            i++;
           }
         }
         // return Column(children: [
@@ -233,12 +235,12 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget orderCard(Order order){
+  Widget orderCard(Order order, OrderComment comment){
     return Padding(
       padding: EdgeInsets.all(5),
       child: GestureDetector(
         onTap: () async {
-          await Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderDetails(order)));
+          await Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderDetails(order, comment)));
           setState((){});
         },
         child: Card(

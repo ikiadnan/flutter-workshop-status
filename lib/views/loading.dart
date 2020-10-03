@@ -15,9 +15,9 @@ class Loading extends StatelessWidget {
     initAuthProvider(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('To Do App'),
-      ),
+      // appBar: AppBar(
+      //   title: Text('To Do App'),
+      // ),
       body: Center(
         child: Container(
           child: Padding(

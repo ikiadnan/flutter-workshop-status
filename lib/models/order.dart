@@ -6,8 +6,8 @@ String orderToJson(List<Order> data) => json.encode(new List<dynamic>.from(data.
 
 class Order {
     int id;
-    DateTime createdAt;
-    DateTime updatedAt;
+    String createdAt;
+    String updatedAt;
     String createdBy;
     String updatedBy;
     int orderId;
@@ -16,8 +16,8 @@ class Order {
     String phoneNumber;
     String carId;
     String carPlateNum;
-    List<String> items = [];
-    List<int> itemsCount = [];
+    int statusCommentRefId;
+    int itemsRefId;
     String status;
     
     Order({
@@ -32,15 +32,15 @@ class Order {
       this.phoneNumber,
       this.carId,
       this.carPlateNum,
-      this.items,
-      this.itemsCount,
-      this.status
+      this.itemsRefId,
+      this.status,
+      this.statusCommentRefId
     });
 
     factory Order.fromJson(Map<String, dynamic> json) => new Order(
       id: json["id"],
-      createdAt: DateTime.parse(json["created_at"]),
-      updatedAt: DateTime.parse(json["updated_at"]),
+      createdAt: json["created_at"],
+      updatedAt: json["updated_at"],
       createdBy: json["created_by"],
       updatedBy: json["updated_by"],
       orderId: json["order_id"],
@@ -49,15 +49,31 @@ class Order {
       phoneNumber: json["phone"],
       carId: json["car_id"],
       carPlateNum: json["car_plate"],
-      items: json["items"],
-      itemsCount: json["items_count"],
-      status: json["status"]
+      itemsRefId: json["items_ref_id"],
+      status: json["status"],
+      statusCommentRefId: json["status_comment_ref_id"]
     );
 
+    factory Order.fromOrderAndCommentRef(Order order, int ref) => new Order(
+      id: order.id,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      createdBy: order.createdBy,
+      updatedBy: order.updatedBy,
+      orderId: order.orderId,
+      customerName: order.customerName,
+      customerAddress: order.customerAddress,
+      phoneNumber: order.phoneNumber,
+      carId: order.carId,
+      carPlateNum: order.carPlateNum,
+      itemsRefId: order.itemsRefId,
+      status: order.status,
+      statusCommentRefId: ref
+    );
     Map<String, dynamic> toJson() => {
       //"id": id,
-      "created_at": createdAt.toString(),
-      "updated_at": updatedAt.toString(),
+      "created_at": createdAt,
+      "updated_at": updatedAt,
       "created_by": createdBy,
       "updated_by": updatedBy,
       "order_id": orderId,
@@ -66,8 +82,8 @@ class Order {
       "phone": phoneNumber,
       "car_id": carId,
       "car_plate": carPlateNum,
-      "items": items,
-      "items_count": itemsCount,
-      "status": status
+      "items_ref_id": itemsRefId,//leaves?.map((leave) => leave.toJson())?.toList(growable: false)
+      "status": status,
+      "status_comment_ref_id": statusCommentRefId
     };
 }

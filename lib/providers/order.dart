@@ -5,6 +5,7 @@ import 'package:cat_app/utils/exceptions.dart';
 import 'package:cat_app/utils/order_response.dart';
 //import 'package:cat_app/services/api.dart';
 import 'package:cat_app/models/order.dart';
+import 'package:cat_app/models/ordercomment.dart';
 import 'package:cat_app/providers/database.dart';
 
 class OrderProvider with ChangeNotifier {
@@ -69,7 +70,11 @@ class OrderProvider with ChangeNotifier {
   }
 
   Future<List<Order>> getAllOrder() async {
-    return await DatabaseProvider.dbProvider.getAllOrderSortedById();
+    return await DatabaseProvider.dbProvider.getAllOrderSortedByDate();
+  }
+
+  Future<List<OrderComment>> getAllComments(List<Order> orders) async {
+    return await DatabaseProvider.dbProvider.getAllOrderComment(orders);
   }
 
   Future<bool> toggleTodo(Order order) async {

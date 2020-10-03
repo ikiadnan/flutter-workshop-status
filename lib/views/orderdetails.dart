@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import 'package:cat_app/providers/auth.dart';
 import 'package:cat_app/providers/order.dart';
 import 'package:cat_app/providers/database.dart';
 import 'package:cat_app/models/user.dart';
 import 'package:cat_app/models/order.dart';
+import 'package:cat_app/models/ordercomment.dart';
 import 'package:cat_app/utils/validate.dart';
 import 'package:cat_app/styles/styles.dart';
 import 'package:cat_app/widgets/styled_flat_button.dart';
@@ -16,8 +22,9 @@ import 'package:cat_app/widgets/notification_text.dart';
 List<String> listStatus = ["Queued", "Ketok", "Dempul", "Epoxy", "Cat", "Poles", "Perakitan", "Finishing"];
 
 class OrderDetails extends StatelessWidget {
-  OrderDetails(this.order);
+  OrderDetails(this.order, this.comment);
   final Order order;
+  final OrderComment comment;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,8 +50,9 @@ class OrderDetails extends StatelessWidget {
 }
 
 class OrderDetailsForm extends StatefulWidget {
-  const OrderDetailsForm({this.order, Key key}) : super(key: key);
+  const OrderDetailsForm({this.order,this.comment, Key key}) : super(key: key);
   final Order order;
+  final OrderComment comment;
   @override
   OrderDetailsFormState createState() => OrderDetailsFormState();
 }
@@ -53,49 +61,108 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Order oldOrder;
+  OrderComment oldOrderComment;
   
   Order updatedOrder;
+  OrderComment updatedComment;
   String newCustomerName;
   String newCustomerAddress;
   String newCustomerPhone;
   String newCarId;
   String newCarPlateNum;
   String newStatus;
+  int newItemsRefId;
+  int newStatusCommentRefId;
+  OrderComment newOrderComment;
 
   bool isEditMode = false;
   bool isAddNewStatus = false;
+  String newComment = "";
+  final ImagePicker _picker = ImagePicker();
+  PickedFile _imageFile;
+  File image;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     oldOrder = widget.order;
+    oldOrderComment = widget.comment;
+    updatedComment = oldOrderComment;
     newCustomerName = widget.order.customerName;
     newCustomerAddress = widget.order.customerAddress;
     newCustomerPhone = widget.order.phoneNumber;
     newCarId = widget.order.carId;
     newCarPlateNum = widget.order.carPlateNum;
     newStatus = widget.order.status;
+    if(listStatus.indexOf(newStatus) == 0) {
+      newItemsRefId = null;
+      newStatusCommentRefId = null;
+    } else{
+      newItemsRefId = widget.order.itemsRefId;
+      newStatusCommentRefId = widget.order.statusCommentRefId;
+    }
   }
   Future<void> update() async {
     final form = _formKey.currentState;
     if (form.validate()) {
       //await Provider.of<OrderProvider>(context, listen: false).addOrder(order);
       User user = User.fromJson(Provider.of<AuthProvider>(context,listen: false).user);
+      
+      if(_imageFile != null) {
+        
+        print(listStatus.indexOf(newStatus));
+        newStatus = listStatus[listStatus.indexOf(newStatus)+1];
+        //Map<String,String> sc = {"image": _imageFile.path, "comment": newComment};
+        //newStatusComment.add(sc);
+        // newStatusComment.addAll({_imageFile.path: newComment});
+        if(updatedComment == null){
+          updatedComment = OrderComment.fromJson(
+            {
+              "created_at": DateFormat.yMMMd().format(new DateTime.now()),
+              "updated_at": DateFormat.yMMMd().format(new DateTime.now()),
+              "created_by": user.name,
+              "updated_by": user.name,
+              "image_ketok": _imageFile.path,
+              "comment_ketok": newComment,
+              // "image_dempul": imageDempul,
+              // "comment_dempul": commentDempul,
+              // "image_epoxy": imageEpoxy,
+              // "comment_epoxy": commentEpoxy,
+              // "image_cat": imageCat,
+              // "comment_cat": commentCat,
+              // "image_poles": imagePoles,
+              // "comment_poles": commentPoles,
+              // "image_perakitan": imagePerakitan,
+              // "comment_perakitan": commentPerakitan,
+              // "image_finishing": imageFinishing,
+              // "comment_finishing": commentFinishing,
+            }
+          );
+        } else {
+          String statusString = newStatus.toLowerCase();
+          var uc = updatedComment.toJson();
+          uc["image_$statusString"] = _imageFile.path;
+          uc["comment_$statusString"] = newComment;
+          updatedComment = OrderComment.fromJson(uc);
+        }
+      }
       updatedOrder = Order(
+        createdAt: oldOrder.createdAt,
+        updatedAt: DateFormat.yMMMd().format(new DateTime.now()),
+        createdBy: oldOrder.createdBy,
+        updatedBy: user.name,
         orderId: oldOrder.orderId,
         customerName: newCustomerName,
         customerAddress: newCustomerAddress,
         phoneNumber: newCustomerPhone,
         carId: newCarId,
         carPlateNum: newCarPlateNum,
+        itemsRefId: oldOrder.itemsRefId,
         status: newStatus,
-        createdAt: oldOrder.createdAt,
-        updatedAt: DateTime.now().toUtc(),
-        updatedBy: user.name,
-        createdBy: oldOrder.createdBy,
+        statusCommentRefId: newStatusCommentRefId
       );
       print(oldOrder.id);
-      var result = await DatabaseProvider.dbProvider.updateOrder(oldOrder.id, updatedOrder);
+      var result = await DatabaseProvider.dbProvider.updateOrder(oldOrder.id, updatedOrder, updatedComment);
       if(result != null){
         print(result);
         Navigator.pop(context);
@@ -114,6 +181,7 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
         children: [
           isEditMode ? editForm(): viewForm(),
           SizedBox(height: 15.0),
+          showCommentsAndImages(),
           isAddNewStatus ? newCommentAndPicture(): newCommentAndPictureBtn(),
           SizedBox(height: 15.0),
           StyledFlatButton(
@@ -177,9 +245,11 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
             child: IconButton(
               icon: Icon(Icons.edit),
               onPressed: (){
-                setState((){
-                  isEditMode = true;
-                });
+                if(!isAddNewStatus){
+                  setState((){
+                    isEditMode = true;
+                  });
+                }
               },
             ),
           ),
@@ -274,11 +344,35 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
     );
   }
 
-  Widget newCommentAndPicture(){
-    bool isPictureAdded = false;
+  Widget showCommentsAndImages(){
+    List<Widget> widgetList = [];
+    // for(int i = 1; i< listStatus.indexOf(newStatus); i++){
+    //   widgetList.add(commentAndImages(listStatus[i],newStatusComment[i]));
+    //   SizedBox(height: 15.0);
+    // }
+    int commentCount = listStatus.indexOf(newStatus);
+    if(newOrderComment!=null){
+      var c = newOrderComment.toJson();
+      for(int i=1; i< commentCount;i++){
+        String stat = listStatus[i];
+        widgetList.add(commentAndImages(stat,c["image_$stat"], c["comment_$stat"]));
+        SizedBox(height: 15.0);
+      }
+
+    }
+    // newStatusComment.map((image, comment) {
+    //   widgetList.add(commentAndImages(listStatus[i],image, comment));
+    //   SizedBox(height: 15.0);
+    // });
+    
+    return Column(
+      children: widgetList,
+    );
+  }
+  Widget commentAndImages(String status, String image, String comment){
     return Container(
       padding: EdgeInsets.all(10),
-      height: 300,
+      //height: 300,
       decoration: BoxDecoration(
         border: Border.all(
           color: Colors.grey,
@@ -292,14 +386,114 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
           Positioned(
             child: Column(
               children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text(
+                    "Proses " + status,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    )
+                  ),
+                ),
+                SizedBox(height: 15.0),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(5),
-                  child: Image(
+                  child: Image.file(File(image)),
+                ),
+                SizedBox(height: 15.0),
+                TextFormField(
+                  enabled: false,
+                  initialValue: comment,
+                  maxLines: 5,
+                  decoration: Styles.input.copyWith(
+                    hintText: 'Comment',
+                  ),
+                  validator: (value) {
+                    newComment = value.trim();
+                    return Validate.requiredField(value,"comment is required");
+                  }
+                ),
+              ],
+            ), 
+          ),
+          
+          Positioned(
+            top: -10,
+            right: -10,
+            child: IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: (){
+                //setState((){
+                  // isAddNewStatus = false;
+                  // _imageFile = null;
+                //});
+              },
+            ),
+          ),
+          // Positioned(
+          //   left: -10,
+          //   top: 55,
+          //   child: FlatButton(
+          //     child: Container(
+          //       padding: EdgeInsets.all(10),
+          //       decoration: BoxDecoration(
+          //         border: Border.all(
+          //           color: Colors.white,
+          //         ),
+          //         borderRadius: BorderRadius.all(Radius.circular(5)),
+          //         color: Color(0xAA000000),
+          //       ),
+          //       child: Text( _imageFile == null ? "Take a photo" : "update photo",
+          //         style: TextStyle(
+          //           color: Colors.white,
+          //         ),
+          //       ),
+          //     ),
+          //     onPressed: () async {
+          //       chooseImageSource(context);
+          //     },
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+  Widget newCommentAndPicture(){
+    return Container(
+      padding: EdgeInsets.all(10),
+      //height: 300,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey,
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        color: Colors.white,
+      ),
+      child: Stack(
+        //alignment: Alignment.center,
+        children: [
+          Positioned(
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text(
+                    "Proses " + listStatus[listStatus.indexOf(newStatus) + 1],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    )
+                  ),
+                ),
+                SizedBox(height: 15.0),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: _imageFile == null?
+                  Image(
                     width: double.infinity,
                     height: 100,
                     fit: BoxFit.fitWidth,
                     image: AssetImage("assets/images/placeholder.jpg"),
-                  ),
+                  ) : Image.file(File(_imageFile.path)),
                 ),
                 SizedBox(height: 15.0),
                 TextFormField(
@@ -307,10 +501,10 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
                   //initialValue: newCustomerName,
                   maxLines: 5,
                   decoration: Styles.input.copyWith(
-                    hintText: 'Nama',
+                    hintText: 'Comment',
                   ),
                   validator: (value) {
-                    //newCustomerName = value.trim();
+                    newComment = value.trim();
                     return Validate.requiredField(value,"Name is required");
                   }
                 ),
@@ -326,21 +520,100 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
               onPressed: (){
                 setState((){
                   isAddNewStatus = false;
+                  _imageFile = null;
                 });
               },
             ),
           ),
           Positioned(
-            right: 10,
-            top: 50,
-            child: StyledFlatButton(
-              'Add',
-              onPressed: (){},
+            left: -10,
+            top: 55,
+            child: FlatButton(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.white,
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  color: Color(0xAA000000),
+                ),
+                child: Text( _imageFile == null ? "Take a photo" : "update photo",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              onPressed: () async {
+                chooseImageSource(context);
+              },
             ),
           ),
         ],
       ),
     );
+  }
+
+  void chooseImageSource(BuildContext context){
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Row(
+          children: [
+            FlatButton(
+              child: Text("Camera"),
+              onPressed: (){
+                takeCameraPhoto();
+                Navigator.pop(context);
+              }
+            ),
+            FlatButton(
+              child: Text("Gallery"),
+              onPressed: (){
+                takeGalleryPhoto();
+                Navigator.pop(context);
+              }
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void takeGalleryPhoto() async {
+    _picker.getImage(source: ImageSource.gallery)
+        .then((recordedImage) {
+      if (recordedImage != null && recordedImage.path != null) {
+        setState(() {
+          //firstButtonText = 'saving in progress...';
+        });
+        GallerySaver.saveImage(recordedImage.path).then((path) {
+        print(recordedImage.path);
+          setState(() {
+            _imageFile = recordedImage;
+            //firstButtonText = 'image saved!';
+          });
+        });
+      }
+    });
+  }
+
+  void takeCameraPhoto() async {
+    _picker.getImage(source: ImageSource.camera)
+        .then((recordedImage) {
+      if (recordedImage != null && recordedImage.path != null) {
+        setState(() {
+          //firstButtonText = 'saving in progress...';
+        });
+        GallerySaver.saveImage(recordedImage.path).then((path) {
+        print(recordedImage.path);
+          setState(() {
+            _imageFile = recordedImage;
+            //firstButtonText = 'image saved!';
+          });
+        });
+      }
+    });
   }
 
   Widget editForm(){
@@ -444,34 +717,6 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
                 child:
                 Text("Status: " + newStatus,
                 ),
-                // DropdownButtonHideUnderline(
-                //   child: ButtonTheme(
-                //     alignedDropdown: true,
-                //     child: DropdownButton(
-                //       //iconEnabledColor: colorPage,
-                //       hint: Text("-"),
-                //       value: newStatus,
-                //       items: listStatus.map((value) {
-                //         return DropdownMenuItem(
-                //           child: Text(
-                //             value,
-                //             style: TextStyle(
-                //               //fontWeight: FontWeight.bold,
-                //               //fontSize: valueTextTitle,
-                //               //color: colorPage,
-                //             ),
-                //           ),
-                //           value: value,
-                //         );
-                //       }).toList(),
-                //       onChanged: (value) {
-                //         setState(() {
-                //           newStatus = value;
-                //         });
-                //       },
-                //     ),
-                //   ),
-                // ),
               ),
             ],    
           ),   
