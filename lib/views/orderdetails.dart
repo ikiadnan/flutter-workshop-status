@@ -41,7 +41,7 @@ class OrderDetails extends StatelessWidget {
         child: Container(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(30.0, 0.0, 30.0, 0.0),
-            child: OrderDetailsForm(order: order),
+            child: OrderDetailsForm(order: order, comment: comment,),
           ),
         ),
       ),
@@ -50,7 +50,7 @@ class OrderDetails extends StatelessWidget {
 }
 
 class OrderDetailsForm extends StatefulWidget {
-  const OrderDetailsForm({this.order,this.comment, Key key}) : super(key: key);
+  const OrderDetailsForm({this.order, this.comment, Key key}) : super(key: key);
   final Order order;
   final OrderComment comment;
   @override
@@ -73,7 +73,6 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
   String newStatus;
   int newItemsRefId;
   int newStatusCommentRefId;
-  OrderComment newOrderComment;
 
   bool isEditMode = false;
   bool isAddNewStatus = false;
@@ -87,7 +86,7 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
     super.initState();
     oldOrder = widget.order;
     oldOrderComment = widget.comment;
-    updatedComment = oldOrderComment;
+    updatedComment = widget.comment;
     newCustomerName = widget.order.customerName;
     newCustomerAddress = widget.order.customerAddress;
     newCustomerPhone = widget.order.phoneNumber;
@@ -106,12 +105,10 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
     final form = _formKey.currentState;
     if (form.validate()) {
       //await Provider.of<OrderProvider>(context, listen: false).addOrder(order);
+      newStatus = listStatus[listStatus.indexOf(newStatus)+1];
       User user = User.fromJson(Provider.of<AuthProvider>(context,listen: false).user);
       
       if(_imageFile != null) {
-        
-        print(listStatus.indexOf(newStatus));
-        newStatus = listStatus[listStatus.indexOf(newStatus)+1];
         //Map<String,String> sc = {"image": _imageFile.path, "comment": newComment};
         //newStatusComment.add(sc);
         // newStatusComment.addAll({_imageFile.path: newComment});
@@ -141,6 +138,7 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
         } else {
           String statusString = newStatus.toLowerCase();
           var uc = updatedComment.toJson();
+          uc["updated_by"] = user.name;
           uc["image_$statusString"] = _imageFile.path;
           uc["comment_$statusString"] = newComment;
           updatedComment = OrderComment.fromJson(uc);
@@ -161,10 +159,8 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
         status: newStatus,
         statusCommentRefId: newStatusCommentRefId
       );
-      print(oldOrder.id);
       var result = await DatabaseProvider.dbProvider.updateOrder(oldOrder.id, updatedOrder, updatedComment);
       if(result != null){
-        print(result);
         Navigator.pop(context);
       }
     }
@@ -351,12 +347,12 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
     //   SizedBox(height: 15.0);
     // }
     int commentCount = listStatus.indexOf(newStatus);
-    if(newOrderComment!=null){
-      var c = newOrderComment.toJson();
-      for(int i=1; i< commentCount;i++){
-        String stat = listStatus[i];
+    if(updatedComment!=null){
+      var c = updatedComment.toJson();
+      for(int i=1; i<= commentCount;i++){
+        String stat = listStatus[i].toLowerCase();
         widgetList.add(commentAndImages(stat,c["image_$stat"], c["comment_$stat"]));
-        SizedBox(height: 15.0);
+        widgetList.add(SizedBox(height: 15.0));
       }
 
     }
@@ -581,18 +577,10 @@ class OrderDetailsFormState extends State<OrderDetailsForm> {
   }
 
   void takeGalleryPhoto() async {
-    _picker.getImage(source: ImageSource.gallery)
-        .then((recordedImage) {
+    _picker.getImage(source: ImageSource.gallery).then((recordedImage) {
       if (recordedImage != null && recordedImage.path != null) {
         setState(() {
-          //firstButtonText = 'saving in progress...';
-        });
-        GallerySaver.saveImage(recordedImage.path).then((path) {
-        print(recordedImage.path);
-          setState(() {
             _imageFile = recordedImage;
-            //firstButtonText = 'image saved!';
-          });
         });
       }
     });

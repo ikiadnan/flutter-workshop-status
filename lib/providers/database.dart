@@ -121,6 +121,7 @@ class DatabaseProvider with ChangeNotifier {
     for(Order order in orders){
       if(order.statusCommentRefId != null){
         Map<String,dynamic> mapOc = await _orderCommentsRef.record(order.id).get(await database);
+        print(mapOc);
         result.add(OrderComment.fromJson(mapOc));
       }
     }
@@ -140,7 +141,7 @@ class DatabaseProvider with ChangeNotifier {
     return recordSnapshots.map((snapshot) {
       final order = Order.fromJson(snapshot.value);
       order.id = snapshot.key;
-      print(order.id.toString() + order.toJson().toString());
+      print(order.toJson());
       return order;
     }).toList();
   }

@@ -218,7 +218,11 @@ class _DashboardState extends State<Dashboard> {
           );
           int i=0;
           for(var order in listorder){
-            cardlist.add(orderCard(order, listcomment.isEmpty ? null : listcomment[i]));
+            OrderComment oc;
+            if( i < listcomment.length){
+              oc =listcomment[i];
+            }
+            cardlist.add(orderCard(order, oc));
             i++;
           }
         }
