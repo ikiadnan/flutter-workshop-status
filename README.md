@@ -1,6 +1,6 @@
 # cat_app
 
-A new Flutter project.
+A new Flutter project for workshop status monitoring.
 
 ## Getting Started
 
