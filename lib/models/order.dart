@@ -6,8 +6,8 @@ String orderToJson(List<Order> data) => json.encode(new List<dynamic>.from(data.
 
 class Order {
     int id;
-    String createdAt;
-    String updatedAt;
+    DateTime createdAt;
+    DateTime updatedAt;
     String createdBy;
     String updatedBy;
     int orderId;
@@ -39,8 +39,8 @@ class Order {
 
     factory Order.fromJson(Map<String, dynamic> json) => new Order(
       id: json["id"],
-      createdAt: json["created_at"],
-      updatedAt: json["updated_at"],
+      createdAt: DateTime.parse(json["created_at"]),
+      updatedAt: DateTime.parse(json["updated_at"]),
       createdBy: json["created_by"],
       updatedBy: json["updated_by"],
       orderId: json["order_id"],
@@ -72,8 +72,8 @@ class Order {
     );
     Map<String, dynamic> toJson() => {
       //"id": id,
-      "created_at": createdAt,
-      "updated_at": updatedAt,
+      "created_at": createdAt.toIso8601String(),
+      "updated_at": updatedAt.toIso8601String(),
       "created_by": createdBy,
       "updated_by": updatedBy,
       "order_id": orderId,

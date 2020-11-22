@@ -60,8 +60,8 @@ class NewOrderFormState extends State<NewOrderForm> {
       //await Provider.of<OrderProvider>(context, listen: false).addOrder(order);
       User user = User.fromJson(Provider.of<AuthProvider>(context,listen: false).user);
       order = Order(
-        createdAt: DateFormat.yMMMd().format(new DateTime.now()),
-        updatedAt: DateFormat.yMMMd().format(new DateTime.now()),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
         createdBy: user.name,
         updatedBy: user.name,
         orderId: 1,

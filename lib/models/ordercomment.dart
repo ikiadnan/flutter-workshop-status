@@ -8,10 +8,12 @@ String orderToJson(List<OrderComment> data) => json.encode(new List<dynamic>.fro
 
 class OrderComment {
     int id;
-    String createdAt;
-    String updatedAt;
+    DateTime createdAt;
+    DateTime updatedAt;
     String createdBy;
     String updatedBy;
+    String imageQueued;
+    String commentQueued;
     String imageKetok;
     String commentKetok;
     String imageDempul;
@@ -33,6 +35,8 @@ class OrderComment {
       this.updatedAt,
       this.createdBy,
       this.updatedBy,
+      this.imageQueued,
+      this.commentQueued,
       this.imageKetok,
       this.commentKetok,
       this.imageDempul,
@@ -51,10 +55,12 @@ class OrderComment {
 
     factory OrderComment.fromJson(Map<String, dynamic> json) => new OrderComment(
       id: json["id"],
-      createdAt: json["created_at"],
-      updatedAt: json["updated_at"],
+      createdAt: DateTime.parse(json["created_at"]),
+      updatedAt: DateTime.parse(json["updated_at"]),
       createdBy: json["created_by"],
       updatedBy: json["updated_by"],
+      imageQueued: json["image_queued"],
+      commentQueued: json["comment_queued"],
       imageKetok: json["image_ketok"],
       commentKetok: json["comment_ketok"],
       imageDempul: json["image_dempul"],
@@ -73,10 +79,12 @@ class OrderComment {
 
     Map<String, dynamic> toJson() => {
       //"id": id,
-      "created_at": createdAt,
-      "updated_at": updatedAt,
+      "created_at": createdAt.toIso8601String(),
+      "updated_at": updatedAt.toIso8601String(),
       "created_by": createdBy,
       "updated_by": updatedBy,
+      "image_queued": imageQueued,
+      "comment_queued": commentQueued,
       "image_ketok": imageKetok,
       "comment_ketok": commentKetok,
       "image_dempul": imageDempul,

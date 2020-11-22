@@ -3,6 +3,9 @@ import 'package:cat_app/providers/order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:cat_app/widgets/styled_flat_button.dart';
 import 'package:cat_app/providers/auth.dart';
 import 'package:cat_app/models/order.dart';
@@ -71,7 +74,17 @@ class _DashboardState extends State<Dashboard> {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
     ));
-    return Scaffold(
+    return RefreshConfiguration(
+      footerTriggerDistance: 15,
+      dragSpeedRatio: 0.91,
+      headerBuilder: () => MaterialClassicHeader(),
+      footerBuilder: () => ClassicFooter(),
+      enableLoadingWhenNoData: false,
+      shouldFooterFollowWhenNotFull: (state) {
+        // If you want load more with noMoreData state ,may be you should return false
+        return false;
+      },
+      child: Scaffold(
       backgroundColor: Color(0xFFF1F1F1),
       floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
           onPressed: () {
@@ -97,6 +110,7 @@ class _DashboardState extends State<Dashboard> {
         onTap: _onItemTapped,
       ),
       body: generateBody(context, _selectedIndex),
+      ),
     );
   }
 
@@ -178,7 +192,6 @@ class _DashboardState extends State<Dashboard> {
               'Log out',
               onPressed: (){
                 Provider.of<AuthProvider>(context, listen: false).logOut();
-                //Navigator.pop(context);
               }
             ),
           ],
@@ -190,11 +203,16 @@ class _DashboardState extends State<Dashboard> {
     return FutureBuilder(
       future : reloadOrders(context),
       builder: (context, snap){
-        // if(snap.data == null){
-        //   return Container(
-        //     width: 10,
-        //   );
-        // }
+        if(snap.data == null){
+          return Center(
+            child: Container(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(30.0, 0.0, 30.0, 0.0),
+                child: new CircularProgressIndicator(),
+              ),
+            ),
+          );
+        }
         
         List<Order> listorder = snap.data.elementAt(0);
         List<OrderComment> listcomment = snap.data.elementAt(1);
@@ -226,12 +244,6 @@ class _DashboardState extends State<Dashboard> {
             i++;
           }
         }
-        // return Column(children: [
-        //   Container(height: 150, color: Colors.grey),
-        //   Container(height: 150, color: Colors.blue),
-        //   Container(height: 150, color: Colors.grey),
-        //   Container(height: 150, color: Colors.blue),
-        // ],);
         return Column(
           children: cardlist,
         );
@@ -240,6 +252,19 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget orderCard(Order order, OrderComment comment){
+    int statusIdx = listStatus.indexOf(order.status);
+    List<Widget> stat = [];
+    for(int i=1; i< listStatus.length; i++){
+        if(i == statusIdx - 1){
+        stat.add(processIndicator(listStatus[i], ProcessStatus.finished, ProcessStatus.running));
+      } else if(i<statusIdx){
+        stat.add(processIndicator(listStatus[i], ProcessStatus.finished, ProcessStatus.finished));
+      } else if(i == statusIdx){
+        stat.add(processIndicator(listStatus[i], ProcessStatus.running, ProcessStatus.unfinished));
+      } else if(i > statusIdx){
+        stat.add(processIndicator(listStatus[i], ProcessStatus.unfinished, ProcessStatus.unfinished));
+      }
+    }
     return Padding(
       padding: EdgeInsets.all(5),
       child: GestureDetector(
@@ -317,7 +342,7 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order.createdAt.toString(),
+                              Text(DateFormat.yMMMd().format(order.createdAt),
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -332,7 +357,7 @@ class _DashboardState extends State<Dashboard> {
                                   fontSize: 12,
                                 ),
                               ),
-                              Text(order.createdAt.toString(),
+                              Text(DateFormat.yMMMd().format(order.createdAt),
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -363,15 +388,7 @@ class _DashboardState extends State<Dashboard> {
                     height: 30,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        processIndicator("Ketok", ProcessStatus.finished, ProcessStatus.finished),
-                        processIndicator("Dempul", ProcessStatus.running, ProcessStatus.unfinished),
-                        processIndicator("Epoxy", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                        processIndicator("Cat", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                        processIndicator("Poles", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                        processIndicator("Perakitan", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                        processIndicator("Finishing", ProcessStatus.unfinished, ProcessStatus.unfinished),
-                      ],
+                      children: stat,
                     ),
                    ),
                 ],

@@ -73,6 +73,10 @@ class OrderProvider with ChangeNotifier {
     return await DatabaseProvider.dbProvider.getAllOrderSortedByDate();
   }
 
+  Future removeOrder(Order order) async {
+    await DatabaseProvider.dbProvider.removeOrder(order);
+  }
+
   Future<List<OrderComment>> getAllComments(List<Order> orders) async {
     return await DatabaseProvider.dbProvider.getAllOrderComment(orders);
   }

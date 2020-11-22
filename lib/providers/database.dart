@@ -130,7 +130,7 @@ class DatabaseProvider with ChangeNotifier {
   Future<List<Order>> getAllOrderSortedByDate() async {
     // Finder object can also sort data.
     final finder = Finder(sortOrders: [
-      SortOrder('created_at', false),
+      SortOrder('updated_at', false),
     ]);
 
     final recordSnapshots = await _orderRef.find(
@@ -160,6 +160,9 @@ class DatabaseProvider with ChangeNotifier {
     }
   }
 
+  Future removeOrder(Order order) async {
+    await _orderRef.record(order.id).delete(await database);
+  }
   initDatabaseProvider() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "cat_app.db");
